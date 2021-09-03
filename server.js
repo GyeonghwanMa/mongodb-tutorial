@@ -4,6 +4,7 @@ const app = express();
 
 const users = [];
 
+// json을 자바스크립트로 변경
 app.use(express.json());
 
 app.get('/user', function(req, res) {

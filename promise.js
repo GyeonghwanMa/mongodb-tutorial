@@ -9,6 +9,19 @@ const addSum = (a, b) => {
     });
 }
 
-addSum(10, 'd')
-    .then((sum) => console.log({sum}))
-    .catch((error) => console.log({error}));
+// addSum(10, 10)
+//     .then((sum) => console.log({sum}))
+//     .catch((error) => console.log({error}));
+
+
+const totalSum = async () => {
+    try {
+        let sum = await addSum(10, 10);    
+        let sum2 = await addSum(sum, 10);
+        console.log({sum, sum2});
+    } catch (error) {
+        if (error) console.log({error});
+    }
+}
+
+totalSum();

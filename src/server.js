@@ -13,10 +13,31 @@ const server = async() => {
         // json을 자바스크립트로 변경
         app.use(express.json());
         
-        app.get('/user', (req, res) => {
+        app.get('/user', async (req, res) => {
             // return res.send({users: users})
+            try {
+                const users = await User.find({});
+                return res.send({ users });
+                
+            } catch (error) {
+                console.log(error);
+                return res.status(500).send({error: error.message});
+            }
         });
-        
+
+        app.get('/user/:userId', async(req, res) => {
+            try {
+                const { userId } = req.params;
+                // isValidObjectId : objectId 형식인지 확인 -> true, false
+                if (!mongoose.isValidObjectId(userId)) return res.status(400).send({ error: "invalid userId" });
+                const user = await User.findOne({ _id: userId });
+                return res.send({ user });
+            } catch (error) {
+                console.log(error);
+                return res.status(500).send({error: error.message});
+            }
+        });
+         
         app.post('/user', async (req, res) => {
             try {
                 let { username, name } = req.body; 
@@ -35,6 +56,19 @@ const server = async() => {
                 // 400 : 유저 실수
                 // 500 : 서버 오류
                 return res.status(500).send({ error: error.message });
+            }
+        });
+
+        app.delete('/user/:userId', async (req, res) => {
+            try {
+                const { userId } = req.params;
+                // isValidObjectId : objectId 형식인지 확인 -> true, false
+                if (!mongoose.isValidObjectId(userId)) return res.status(400).send({ error: "invalid userId" });
+                const user = await User.findOneAndDelete({ _id: userId }); // 객체, null 리턴
+                return res.send({ user });
+            } catch (error) {
+                console.log(error);
+                return res.status(500).send({error: error.message});
             }
         });
         

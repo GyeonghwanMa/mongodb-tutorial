@@ -64,13 +64,28 @@ const server = async() => {
                 const { userId } = req.params;
                 // isValidObjectId : objectId 형식인지 확인 -> true, false
                 if (!mongoose.isValidObjectId(userId)) return res.status(400).send({ error: "invalid userId" });
-                const user = await User.findOneAndDelete({ _id: userId }); // 객체, null 리턴
+                const user = await User.findOneAndDelete({ _id: userId }); // 객체, null 리턴, deleteOne은 리턴 없음
                 return res.send({ user });
             } catch (error) {
                 console.log(error);
                 return res.status(500).send({error: error.message});
             }
         });
+
+        app.put('/user/:userId', async(req, res) => {
+            try {
+                const { userId } = req.params;
+                if (!mongoose.isValidObjectId(userId)) return res.status(400).send({ error: "invalid userId" });
+                const { age } = req.body;
+                if (!age) return res.status(400).send({ err: "age is required" });
+                if (typeof age !== 'number') return res.status(400).send({ error: "age must be a number" }); 
+                const user = await User.findByIdAndUpdate(userId, { $set: { age } }, { new: true });
+                return res.send({ user });
+            } catch (error) {
+                console.log(error);
+                return res.status(500).send({error: error.message});
+            }
+        })
         
         app.listen(3000, () => console.log('server listening on port 3000'));
     } catch (error) {

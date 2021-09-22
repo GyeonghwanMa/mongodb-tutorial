@@ -13,7 +13,7 @@ const server = async() => {
             useUnifiedTopology: true
         });
         
-        // mongoose.set('debug', true)
+        mongoose.set('debug', true)
         // let result = mongoose.connect(MONGO_URI)
         
         // await generateFakeData(100, 10, 300);

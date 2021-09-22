@@ -8,7 +8,7 @@ const test = async () => {
     let { 
         data: {blogs}
     } = await axios.get(`${URI}/blog`);
-    console.log(blogs);
+    // console.log(blogs[3], {depth: 10});
     // promise.all은 promise배열 리턴
     // blogs는 단순 배열
     // blogs = await Promise.all(blogs.map(async blog => {
@@ -27,12 +27,12 @@ const test = async () => {
 
 const testGroup = async () => {
     await test();
-    // await test();
-    // await test();
-    // await test();
-    // await test();
-    // await test();
-    // await test();
+    await test();
+    await test();
+    await test();
+    await test();
+    await test();
+    await test();
 }
 
 testGroup();

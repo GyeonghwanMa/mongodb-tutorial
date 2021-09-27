@@ -33,7 +33,12 @@ commentRouter.post("/", async (req, res) => {
     if (!blog.islive)
       return res.status(400).send({ error: "blog is not available" });
 
-    const comment = new Comment({ content, user, blog });
+    const comment = new Comment({
+      content,
+      user,
+      userFullName: `${user.name.first} ${user.name.last}`,
+      blog,
+    });
     await Promise.all([
       comment.save(),
       Blog.updateOne({ _id: blogId }, { $push: { comments: comment } }),

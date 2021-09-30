@@ -74,4 +74,14 @@ commentRouter.patch("/:commentId", async (req, res) => {
   return res.send({ comment });
 });
 
+commentRouter.delete("/:commentId", async (req, res) => {
+  const { commentId } = req.params;
+  const comment = await Comment.findOneAndDelete({ _id: commentId });
+  await Blog.updateOne(
+    { "comments._id": commentId },
+    { $pull: { comments: { _id: commentId } } }
+  );
+  return res.send({ comment });
+});
+
 module.exports = { commentRouter };

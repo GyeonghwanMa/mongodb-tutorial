@@ -1,8 +1,7 @@
 const { Router } = require("express");
 const userRouter = Router();
-const { User } = require("../models/User");
 const mongoose = require("mongoose");
-const { Blog } = require("../models");
+const { Blog, User, Comment } = require("../models");
 
 userRouter.get("/", async (req, res) => {
   // return res.send({users: users})
@@ -60,7 +59,15 @@ userRouter.delete("/:userId", async (req, res) => {
     // isValidObjectId : objectId 형식인지 확인 -> true, false
     if (!mongoose.isValidObjectId(userId))
       return res.status(400).send({ error: "invalid userId" });
-    const user = await User.findOneAndDelete({ _id: userId }); // 객체, null 리턴, deleteOne은 리턴 없음
+    const [user] = await Promise.all([
+      User.findOneAndDelete({ _id: userId }), // 객체, null 리턴, deleteOne은 리턴 없음
+      Blog.deleteMany({ "user._id": userId }),
+      Blog.updateMany(
+        { "comments.user": userId },
+        { $pull: { comments: { user: userId } } }
+      ),
+      Comment.deleteMany({ user: userId }),
+    ]);
     return res.send({ user });
   } catch (error) {
     console.log(error);
@@ -91,7 +98,15 @@ userRouter.put("/:userId", async (req, res) => {
     if (age) user.age = age;
     if (name) {
       user.name = name;
-      await Blog.updateMany({ "user._id": userId }, { "user.name": name });
+      await Promise.all([
+        Blog.updateMany({ "user._id": userId }, { "user.name": name }),
+        Blog.updateMany(
+          {},
+          // comment $객체
+          { "comments.$[comment].userFullName": `${name.first} ${name.last}` },
+          { arrayFilters: [{ "comment.user": userId }] }
+        ),
+      ]);
     }
     console.log({ userAfterEdit: user });
     await user.save();

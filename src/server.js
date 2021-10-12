@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const { userRouter, blogRouter } = require("./routes");
 const mongoose = require("mongoose");
-const { generateFakeData } = require("../faker2");
+const { generateFakeData } = require("../faker");
 
 const MONGO_URI =
   "mongodb+srv://admin:NhQ4SAxtpVC3x9vV@mongodbtutorial.rmzkk.mongodb.net/BlogService?retryWrites=true&w=majority";
@@ -26,7 +26,7 @@ const server = async () => {
 
     app.listen(3000, async () => {
       console.log("server listening on port 3000");
-      // await generateFakeData(3, 5, 20);
+      // await generateFakeData(100000, 5, 20);
     });
   } catch (error) {
     console.log(error);

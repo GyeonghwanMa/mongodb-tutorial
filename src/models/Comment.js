@@ -7,7 +7,7 @@ const {
 const CommentSchema = new Schema(
   {
     content: { type: String, required: true },
-    user: { type: ObjectId, required: true, ref: "user" },
+    user: { type: ObjectId, required: true, ref: "user", index: true },
     userFullName: { type: String, required: true },
     blog: { type: ObjectId, required: true, ref: "blog" },
   },

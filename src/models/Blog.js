@@ -15,6 +15,7 @@ const BlogSchema = new Schema(
         last: { type: String, required: true },
       },
     }),
+    commentsCount: { type: Number, default: 0, required: true },
     comments: [CommentSchema],
   },
   { timestamps: true }

@@ -4,8 +4,9 @@ const { userRouter, blogRouter } = require("./routes");
 const mongoose = require("mongoose");
 const { generateFakeData } = require("../faker2");
 
-const MONGO_URI =
-  "";
+const { MONGO_URI } = process.env;
+
+if (!MONGO_URI) throw new Error("MONGO_URI is required!!!");
 
 const server = async () => {
   try {

@@ -1,7 +1,7 @@
 const { Router } = require("express");
 const commentRouter = Router({ mergeParams: true });
 const { Blog, Comment, User } = require("../models");
-const { isValidObjectId } = require("mongoose");
+const { isValidObjectId, startSession } = require("mongoose");
 
 /*
     /user
@@ -10,7 +10,10 @@ const { isValidObjectId } = require("mongoose");
 */
 
 commentRouter.post("/", async (req, res) => {
+  // const session = await startSession();
+  let comment;
   try {
+    // await session.withTransaction(async () => {
     const { blogId } = req.params;
     const { content, userId } = req.body;
     if (!isValidObjectId(blogId))
@@ -22,8 +25,8 @@ commentRouter.post("/", async (req, res) => {
 
     // 한번에 불러오기
     const [blog, user] = await Promise.all([
-      Blog.findById(blogId),
-      User.findById(userId),
+      Blog.findById(blogId, {}, {}),
+      User.findById(userId, {}, {}),
     ]);
     // 한번에 불러오기
     // const blog = await Blog.findByIdAndUpdate(blogId);
@@ -33,31 +36,46 @@ commentRouter.post("/", async (req, res) => {
     if (!blog.islive)
       return res.status(400).send({ error: "blog is not available" });
 
-    const comment = new Comment({
+    comment = new Comment({
       content,
       user,
       userFullName: `${user.name.first} ${user.name.last}`,
       blog: blogId,
     });
+    // await session.abortTransaction();
     // await Promise.all([
     //   comment.save(),
     //   Blog.updateOne({ _id: blogId }, { $push: { comments: comment } }),
     // ]);
 
-    blog.commentsCount++;
-    blog.comments.push(comment);
+    // blog.commentsCount++;
+    // blog.comments.push(comment);
 
-    if (blog.commentsCount > 3) blog.comments.shift();
+    // if (blog.commentsCount > 3) blog.comments.shift();
+
+    // await Promise.all([
+    //   comment.save({}),
+    //   blog.save(), // session 없어도됨. session통해서 불러왔기 때문.
+    //   // Blog.updateOne({ _id: blogId }, { $inc: { commentsCount: 1 } }),
+    // ]);
+    // });
 
     await Promise.all([
       comment.save(),
-      blog.save(),
-      // Blog.updateOne({ _id: blogId }, { $inc: { commentsCount: 1 } }),
+      Blog.updateOne(
+        { _id: blogId },
+        {
+          $inc: { commentCount: 1 },
+          $push: { comments: { $each: [comment], $slice: -3 } }, // 같은 컬럼?을 다른 오퍼레이터로 동시에 작업 X
+        }
+      ),
     ]);
 
     return res.send({ comment });
   } catch (error) {
     return res.status(400).send({ error: error.message });
+  } finally {
+    // await session.endSession();
   }
 });
 
